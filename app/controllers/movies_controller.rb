@@ -19,13 +19,23 @@ class MoviesController < ApplicationController
     @ratings = Hash[@all_ratings.map {|x| [x, 1]}] unless @ratings
     session[:ratings] = @ratings
     
+    hash = {}
+    if not params[:order].present? and session[:order]
+      hash[:order] = session[:order]
+    end
+    if not params[:ratings].present? and session[:ratings]
+      hash[:ratings] = session[:ratings]
+    end
+    if not hash.empty?
+      redirect_to movies_path(hash)
+    end
 
     @movies = Movie.where(rating: @ratings.keys)
     if @order and ["title", "release_date"].include?(@order)
       @order = @order.to_sym
       session[:order] = @order
       @movies = @movies.order(@order)
-    elsif @order
+    elsif @order # clear invalid order
       redirect_to movies_path
     end
   end
