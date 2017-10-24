@@ -13,12 +13,17 @@ class MoviesController < ApplicationController
   def index
     @all_ratings = Movie.uniq.pluck(:rating)
     @order = params[:order]
+    @order = session[:order] if not @order and session[:order]
     @ratings = params[:ratings]
+    @ratings = session[:ratings] if (not @ratings or @ratings.empty?) and session[:ratings]
     @ratings = Hash[@all_ratings.map {|x| [x, 1]}] unless @ratings
+    session[:ratings] = @ratings
+    
 
     @movies = Movie.where(rating: @ratings.keys)
     if @order and ["title", "release_date"].include?(@order)
       @order = @order.to_sym
+      session[:order] = @order
       @movies = @movies.order(@order)
     elsif @order
       redirect_to movies_path
