@@ -11,7 +11,15 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    @sort = params[:sort]
+    if @sort and [:title, :release_date].include?(@sort.to_sym)
+      @sort = @sort.to_sym
+      @movies = Movie.all.order(@sort)
+    elsif @sort
+      redirect_to movies_path
+    else
+      @movies = Movie.all
+    end
   end
 
   def new
