@@ -11,14 +11,17 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @sort = params[:sort]
-    if @sort and [:title, :release_date].include?(@sort.to_sym)
-      @sort = @sort.to_sym
-      @movies = Movie.all.order(@sort)
-    elsif @sort
+    @all_ratings = Movie.uniq.pluck(:rating)
+    @order = params[:order]
+    @ratings = params[:ratings]
+    @ratings = Hash[@all_ratings.map {|x| [x, 1]}] unless @ratings
+
+    @movies = Movie.where(rating: @ratings.keys)
+    if @order and ["title", "release_date"].include?(@order)
+      @order = @order.to_sym
+      @movies = @movies.order(@order)
+    elsif @order
       redirect_to movies_path
-    else
-      @movies = Movie.all
     end
   end
 
